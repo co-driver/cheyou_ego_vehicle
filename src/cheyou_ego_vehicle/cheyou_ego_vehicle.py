@@ -34,10 +34,7 @@ class CheYou_EgoVehicle(CarlaEgoVehicle):
     CheYou Ego Vehicle
     """
     def __init__(self):
-        self.__InitialPosition = carla.Transform(carla.Location(-0.55114, 2.08673, 4.202),carla.Rotation(0,0,0)) #pitch ,yaw, roll, unlike Unreal
-
         super(CheYou_EgoVehicle,self).__init__()
-
         #这个订阅者，每当从话题/tf接收到车辆的定位消息的时候，就将其转换为虚拟场景中仿真车辆位置，并
         #刷新这个仿真车辆在虚拟场景中的位置
         self.teleport_subscriber = rospy.Subscriber(
@@ -47,6 +44,9 @@ class CheYou_EgoVehicle(CarlaEgoVehicle):
         self.__tfBuffer = tf2_ros.Buffer()
         self.__listener = tf2_ros.TransformListener(self.__tfBuffer)
         self.__vehicle_transform = carla.Transform()
+
+        #这个变量用来保存ego_vehicle的初始生成位置（特别的，在Z轴方向，是实际的位置，而不是指定的位置）
+        self.__InitialPosition = carla.Transform()        
 
     def sensors(self):
         """
@@ -97,8 +97,19 @@ class CheYou_EgoVehicle(CarlaEgoVehicle):
             }
         ]
 
-    def teleport_command_updated(self,ros_TFMessage):  
-        rospy.loginfo("CheYou: I got a TFMessage")   
+    def restart(self):
+        super(CheYou_EgoVehicle,self).restart()
+        #确保ego_vehicle已经着陆，以便获得正确的Z方向位置
+        rospy.sleep(5)
+        self.__InitialPosition = self.player.get_transform()
+        #高度方向增加2cm,防止移动的时候碰撞
+        self.__InitialPosition.location.z += 0.02
+        rospy.loginfo("ego_vehicle initial transform: x={} y={} z={} yaw={}".format(self.__InitialPosition.location.x,
+                                                                  self.__InitialPosition.location.y,
+                                                                  self.__InitialPosition.location.z,
+                                                                  self.__InitialPosition.rotation.yaw))        
+
+    def teleport_command_updated(self,ros_TFMessage):   
         try:
             #cartographer发布的/tf消息，我们定义了两个坐标系 map->base_link，base_link是车身坐标系 
             trans =self.__tfBuffer.lookup_transform('map','base_link',rospy.Time())
