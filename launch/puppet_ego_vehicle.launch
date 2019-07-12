@@ -1,0 +1,13 @@
+<!-- -->
+
+<launch>  
+
+  <rosparam file="$(find cheyou_ego_vehicle)/config/puppet_settings.yaml" command="load" />
+  
+  <node pkg="cheyou_ego_vehicle" name="puppet_ego_vehicle" type="puppet_ego_vehicle.py" output="screen">
+    <param name="sensor_definition_file" value="$(find cheyou_ego_vehicle)/config/sensors.json" />
+  </node>
+  
+  <node pkg="carla_ros_bridge" name="carla_ros_bridge" type="client.py" output="screen"/>
+  
+</launch>

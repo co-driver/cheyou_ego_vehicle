@@ -1,0 +1,18 @@
+#*-* coding: utf-8 *-*
+use_sim_time: true
+carla:
+  # the network connection for the python connection to CARLA
+  host: 127.0.0.1
+  port: 2000
+  # configuration values for the ego vehicle
+  ego_vehicle:
+    # the role name of the vehicles that acts as ego vehicle for this ros bridge instance
+    # Only the vehicles within this list are controllable from within ROS.
+    # (the vehicle from CARLA is selected which has the attribute 'role_name' set to this value)
+    role_name: ["hero", "ego_vehicle"]
+#注意这些变量的命名空间是“私有”空间
+puppet_ego_vehicle:
+#    vehicle_filter: "co-driver*"
+    spawn_point: "45.44,60.92,1.0,0.0,0.0,180.0"
+  
+  
